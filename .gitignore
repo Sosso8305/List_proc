@@ -2,4 +2,4 @@
 *.exe
 
 # config VSCode
-*.vscode
+.vscode/*
