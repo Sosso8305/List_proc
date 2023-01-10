@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.pbs": "bat",
-        "windows.h": "c"
+        "windows.h": "c",
+        "stdlib.h": "c"
     }
 }
