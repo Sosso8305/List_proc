@@ -2,25 +2,44 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <tlhelp32.h>
+#include "listproc.h"
+
+void display_lpprocessentry32(LPPROCESSENTRY32 lppe){
+    printf("====================================\n");
+    printf("id: %i\n",lppe->th32ProcessID);
+    printf("name: %s\n",lppe->szExeFile);
+    printf("parent id: %i\n",lppe->th32ParentProcessID);
+    printf("priority: %i\n",lppe->pcPriClassBase);
+    printf("count Thread: %i\n",lppe->cntThreads);
+    printf("size: %i\n",lppe->dwSize);
+    printf("associated exe: %i\n",lppe->th32ModuleID);
+    printf("default heap: %i\n",lppe->th32DefaultHeapID);
+    printf("flags: %i\n",lppe->dwFlags);
+    printf("====================================\n");
+
+}
 
 int main(){
     //initialize
     HANDLE list_proc;
-    boolean result;
+    boolean flag;
     LPPROCESSENTRY32 lppe;
-    int flag = 0;
 
 
     list_proc = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0);
     if(list_proc == INVALID_HANDLE_VALUE) return -1;
 
-    while (lppe != NULL && flag == 0){
-        Process32Next(list_proc, lppe);
-        flag = 1;
-
-        printf("id: %i",lppe->th32ProcessID);
-
+    
+    flag = TRUE;
+    while(flag){
+        lppe = (LPPROCESSENTRY32)malloc(sizeof(PROCESSENTRY32));
+        lppe->dwSize = sizeof(PROCESSENTRY32);
+        flag = Process32Next(list_proc, lppe);
+        
+        display_lpprocessentry32(lppe);
+        //add to list
     }
+    
 
     return 0;
 }
