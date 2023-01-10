@@ -8,16 +8,21 @@ int main(){
     HANDLE list_proc;
     boolean result;
     LPPROCESSENTRY32 lppe;
+    int flag = 0;
 
 
     list_proc = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0);
     if(list_proc == INVALID_HANDLE_VALUE) return -1;
 
-    Process32Next(list_proc, lppe);
+    while (lppe != NULL && flag == 0){
+        Process32Next(list_proc, lppe);
+        flag = 1;
 
-    printf("id: %i",lppe->th32ProcessID);
+        printf("id: %i",lppe->th32ProcessID);
+
+    }
 
     return 0;
-
-
 }
+
+
