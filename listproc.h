@@ -8,7 +8,7 @@ typedef struct {
 }DataProcess;
 
 
-typedef struct {
+typedef struct Node {
     DataProcess data;
     struct Node *next;
     struct Node *prev;

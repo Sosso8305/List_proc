@@ -99,7 +99,7 @@ void pushNodeHead(List *list, DataProcess data){
 }
 
 DataProcess popNodeTail(List *list){
-    DataProcess data;
+    DataProcess data = {0};
     Node *temp = list->tail;
     if(list->head == NULL){
         printf("List is empty\n");
@@ -118,7 +118,7 @@ DataProcess popNodeTail(List *list){
 }
 
 DataProcess popNodeHead(List *list){
-    DataProcess data;
+    DataProcess data = {0};
     Node *temp = list->head;
     if(list->head == NULL){
         printf("List is empty\n");
@@ -177,7 +177,7 @@ int main(){
     DataProcess data;
     List listP;
 
-    //get list process
+    //get list process with 1th method
     Hlist_proc = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0);
     if(Hlist_proc == INVALID_HANDLE_VALUE) return -1;
 
@@ -189,15 +189,33 @@ int main(){
         lppe->dwSize = sizeof(PROCESSENTRY32);
         flag = Process32Next(Hlist_proc, lppe);
         
+        if(flag){ // check if the process is not the last
         data = ProcessEntryToDataProcess(lppe);
         pushNodeTail(&listP, data);
+        }
     }
-
+    
     free(lppe);
-    
-      
+    CloseHandle(Hlist_proc);
     display_list(&listP);
-    
+
+
+    //get list process with 2th method
+    //
+    // code
+    //
+
+
+
+    //Compare 2 list
+    //
+    // code
+    //
+
+
+    //free memory
+    freeList(&listP);
+
 
     return 0;
 }
