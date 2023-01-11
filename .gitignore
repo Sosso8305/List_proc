@@ -1,5 +1,7 @@
 # all executable
 *.exe
+!tools/*.exe
+
 
 # config VSCode
 .vscode/*
