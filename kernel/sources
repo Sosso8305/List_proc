@@ -1,0 +1,5 @@
+TARGETNAME=insa-sz
+TARGETTYPE=DRIVER
+
+SOURCES=driver.c
+
