@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <tlhelp32.h>
+#include <psapi.h> // gcc Flag : -lpsapi
 #include "listproc.h"
 
 
+#define maxProcess 65000
 
 ///////////////////////////////////////////////
 //            Function: display             //
@@ -49,8 +51,35 @@ void display_list(List *list){
         display_dataprocess_table(temp->data);
         temp = temp->next;
     }
+    printf("=============================================================\n\n");
+    
 }
 
+
+
+///////////////////////////////////////////////
+//      Function: Debug Privilège           //
+/////////////////////////////////////////////
+
+void SetDebugPrivilege(){
+    TOKEN_PRIVILEGES tp;
+    LUID luid;
+    HANDLE hproc;
+    HANDLE hproc2;
+
+    hproc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId());
+    OpenProcessToken(hproc, TOKEN_ALL_ACCESS, &hproc2);
+
+    LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid);
+    tp.PrivilegeCount = 1;
+    tp.Privileges[0].Luid = luid;
+    tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    AdjustTokenPrivileges(hproc2, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), NULL, NULL);
+    CloseHandle(hproc2);
+    CloseHandle(hproc);
+
+
+}
 
 
 
@@ -146,10 +175,27 @@ int getCountNode(List *list){
     return list->countNode;
 }
 
+void diffList(List *list1, List *list2){
+    Node *temp = list1->head;
+    Node *temp2 = list2->head;
+    
+    while(temp != NULL){
+        while(temp2 != NULL){
+            if(temp->data.ID == temp2->data.ID){
+              continue; 
+
+            }
+            temp2 = temp2->next;
+        }
+    }  
+        
+
+}
+
 
 
 ///////////////////////////////////////////////
-//       Function: ProcessEntery32          //
+//         Function: DataProcess            //
 /////////////////////////////////////////////
 
 DataProcess ProcessEntryToDataProcess(LPPROCESSENTRY32 lppe32){
@@ -158,6 +204,15 @@ DataProcess ProcessEntryToDataProcess(LPPROCESSENTRY32 lppe32){
     strcpy(data.name, lppe32->szExeFile);
     data.parentID = lppe32->th32ParentProcessID;
     data.cntThread = lppe32->cntThreads;
+    return data;
+}
+
+DataProcess genDataProcess(int ID, char *name, int parentID, int cntThread){
+    DataProcess data;
+    data.ID = ID;
+    strcpy(data.name, name);
+    data.parentID = parentID;
+    data.cntThread = cntThread;
     return data;
 }
 
@@ -172,10 +227,20 @@ DataProcess ProcessEntryToDataProcess(LPPROCESSENTRY32 lppe32){
 int main(){
     //initialize
     HANDLE Hlist_proc;
+    HANDLE Hproc;
+    HMODULE Hmodule;
+    DWORD dwAccesProc;
     boolean flag;
     LPPROCESSENTRY32 lppe;
     DataProcess data;
     List listP;
+    List listP2;
+    int pid;
+    char NameProc[sizeName];
+
+    //set debug privilege
+    SetDebugPrivilege();
+
 
     //get list process with 1th method
     Hlist_proc = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0);
@@ -201,11 +266,26 @@ int main(){
 
 
     //get list process with 2th method
-    //
-    // code
-    //
+    initList(&listP2);
+    pid=0;
+    while (pid <= maxProcess){
+        Hproc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+        if (Hproc != NULL && Hproc != INVALID_HANDLE_VALUE){
+            if(EnumProcessModules(Hproc, &Hmodule, sizeof(Hmodule), &dwAccesProc)){
+                ZeroMemory(NameProc, sizeName);
+                GetModuleBaseName(Hproc, Hmodule, NameProc, sizeName);
+                data = genDataProcess(pid, NameProc, -1, -1);
+                pushNodeTail(&listP2, data);
+                
+            }
+        } 
 
+        pid=pid+4;
+   }
 
+    display_list(&listP2);
+   
+    
 
     //Compare 2 list
     //
@@ -215,7 +295,9 @@ int main(){
 
     //free memory
     freeList(&listP);
+    freeList(&listP2);
 
+    system("pause");
 
     return 0;
 }

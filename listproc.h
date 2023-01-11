@@ -36,3 +36,7 @@ void display_dataprocess(DataProcess data);
 void display_dataprocess_table(DataProcess data);
 void display_list(List *list);
 DataProcess ProcessEntryToDataProcess(LPPROCESSENTRY32 lppe32);
+DataProcess genDataProcess(int ID,char *name,int parentID,int cntThread);
+void SetDebugPrivilege();
+void diffList(List *list1, List *list2);
+//Node *findNode(List *list, int ID);
