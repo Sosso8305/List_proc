@@ -7,6 +7,7 @@ typedef struct {
     int cntThread;    //cntThreads
 }DataProcess;
 
+
 typedef struct {
     DataProcess data;
     struct Node *next;
@@ -27,7 +28,11 @@ void pushNodeHead(List *list, DataProcess data);
 DataProcess popNodeTail(List *list);
 DataProcess popNodeHead(List *list);
 void freeList(List *list);
+int getCountNode(List *list);
 
 // Function prototypes
 void display_lpprocessentry32( LPPROCESSENTRY32 lppe32 );
-DataProcess getDataProcess(LPPROCESSENTRY32 lppe32);
+void display_dataprocess(DataProcess data);
+void display_dataprocess_table(DataProcess data);
+void display_list(List *list);
+DataProcess ProcessEntryToDataProcess(LPPROCESSENTRY32 lppe32);
