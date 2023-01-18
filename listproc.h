@@ -14,7 +14,7 @@ typedef struct Node {
     struct Node *prev;
 }Node;
 
-typedef struct {
+typedef struct List{
     Node *head;
     Node *tail;
     int countNode;
@@ -35,8 +35,9 @@ void display_lpprocessentry32( LPPROCESSENTRY32 lppe32 );
 void display_dataprocess(DataProcess data);
 void display_dataprocess_table(DataProcess data);
 void display_list(List *list);
+void write_list(List *list,char *filename);
 DataProcess ProcessEntryToDataProcess(LPPROCESSENTRY32 lppe32);
 DataProcess genDataProcess(int ID,char *name,int parentID,int cntThread);
 void SetDebugPrivilege();
-void diffList(List *list1, List *list2);
+List  diffList(List *list1, List *list2);
 //Node *findNode(List *list, int ID);

@@ -1,6 +1,7 @@
 # all executable
 *.exe
 !tools/*.exe
+list*.txt
 
 
 # config VSCode

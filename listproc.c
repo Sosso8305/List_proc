@@ -55,6 +55,21 @@ void display_list(List *list){
     
 }
 
+void write_list(List *list,char *filename){
+    FILE *f = fopen(filename,"w");
+    fprintf(f,"Count Proc: %d\n",list->countNode);
+    fprintf(f,"=============================================================\n");
+    fprintf(f,"||ID\t||nbThread||ParentID\t||Name\t\n");
+    fprintf(f,"=============================================================\n");
+    Node *temp = list->head;
+    while(temp != NULL){
+        fprintf(f,"||%d\t||%d\t||%d\t||%s\t\n",temp->data.ID,temp->data.cntThread,temp->data.parentID,temp->data.name);
+        temp = temp->next;
+    }
+    fprintf(f,"=============================================================\n\n");
+    fclose(f);
+}
+
 
 
 ///////////////////////////////////////////////
@@ -175,21 +190,32 @@ int getCountNode(List *list){
     return list->countNode;
 }
 
-void diffList(List *list1, List *list2){
-    Node *temp = list1->head;
-    Node *temp2 = list2->head;
+List diffList(List *list1, List *list2){
+    List list;
+    Node *temp;
+    Node *temp2;
+
+    initList(&list);
+    temp = list1->head;
     
     while(temp != NULL){
+        temp2 = list2->head;
         while(temp2 != NULL){
             if(temp->data.ID == temp2->data.ID){
-              continue; 
+              break; 
 
             }
             temp2 = temp2->next;
         }
+
+        if(temp2 == NULL){
+            pushNodeTail(&list, temp->data);
+        }
+
+        temp = temp->next;
     }  
         
-
+    return list;
 }
 
 
@@ -235,6 +261,7 @@ int main(){
     DataProcess data;
     List listP;
     List listP2;
+    List listDiff;
     int pid;
     char NameProc[sizeName];
 
@@ -287,15 +314,19 @@ int main(){
    
     
 
-    //Compare 2 list
-    //
-    // code
-    //
+    //diff list
+    listDiff = diffList(&listP, &listP2);
+    display_list(&listDiff);
 
+    //write to file
+    write_list(&listP, "listP.txt");
+    write_list(&listP2, "listP2.txt");
+    write_list(&listDiff, "listDiff.txt");
 
     //free memory
     freeList(&listP);
     freeList(&listP2);
+    freeList(&listDiff);
 
     system("pause");
 
