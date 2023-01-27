@@ -9,3 +9,6 @@ list*.txt
 
 # shared folder
 .shared-VM/*
+
+#  exemple
+exemple/* 

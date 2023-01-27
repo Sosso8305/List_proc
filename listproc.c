@@ -8,6 +8,7 @@
 
 #define maxProcess 65000
 #define skipProcess 1 // 1--> Skip system process (ID System Process: 0 & 4) 0--> Don't skip system process 
+#define writeFile 1 // 1--> Write file 0--> Don't write file
 
 ///////////////////////////////////////////////
 //            Function: display             //
@@ -192,35 +193,48 @@ int getCountNode(List *list){
 }
 
 List diffList(List *list1, List *list2){
+    int swip = 0;
     List list;
     Node *temp;
     Node *temp2;
+    Node *temp3;
+    Node *temp4;
 
+
+    swip = 0;
     initList(&list);
-    temp = list1->head;
-    
-    while(temp != NULL){
-        temp2 = list2->head;
-        while(temp2 != NULL){
-            // add condition to skip the system process
-            if(temp->data.ID == 0 || temp2->data.ID == 0 || temp->data.ID == 4 || temp2->data.ID == 4){
-              break; 
+    temp3 = list1->head;
+    temp4 = list2->head;
+
+    while(swip<2){
+        temp = temp3;
+        while(temp != NULL){
+            temp2 = temp4;
+            while(temp2 != NULL){
+
+                if(temp->data.ID == temp2->data.ID){
+                break; 
+
+                }
+                temp2 = temp2->next;
             }
-            
-            if(temp->data.ID == temp2->data.ID){
-              break; 
 
+            if(temp2 == NULL){
+                // add condition to skip the system process
+                if(!skipProcess || !(temp->data.ID == 0 || temp->data.ID == 4)){
+                    pushNodeTail(&list, temp->data);
+                }
+                
             }
-            temp2 = temp2->next;
-        }
 
-        if(temp2 == NULL){
-            pushNodeTail(&list, temp->data);
-        }
+            temp = temp->next;
+        } 
 
-        temp = temp->next;
-    }  
-        
+        temp3 = list2->head;
+        temp4 = list1->head;
+        swip++; 
+    } 
+
     return list;
 }
 
@@ -325,9 +339,12 @@ int main(){
     display_list(&listDiff);
 
     //write to file
-    write_list(&listP, "listP.txt");
-    write_list(&listP2, "listP2.txt");
-    write_list(&listDiff, "listDiff.txt");
+    if(writeFile){
+        write_list(&listP, "listP.txt");
+        write_list(&listP2, "listP2.txt");
+        write_list(&listDiff, "listDiff.txt");
+    }
+
 
     //free memory
     freeList(&listP);
