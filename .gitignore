@@ -6,3 +6,6 @@ list*.txt
 
 # config VSCode
 .vscode/*
+
+# shared folder
+.shared-VM/*

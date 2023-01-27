@@ -7,6 +7,7 @@
 
 
 #define maxProcess 65000
+#define skipProcess 1 // 1--> Skip system process (ID System Process: 0 & 4) 0--> Don't skip system process 
 
 ///////////////////////////////////////////////
 //            Function: display             //
@@ -201,6 +202,11 @@ List diffList(List *list1, List *list2){
     while(temp != NULL){
         temp2 = list2->head;
         while(temp2 != NULL){
+            // add condition to skip the system process
+            if(temp->data.ID == 0 || temp2->data.ID == 0 || temp->data.ID == 4 || temp2->data.ID == 4){
+              break; 
+            }
+            
             if(temp->data.ID == temp2->data.ID){
               break; 
 
