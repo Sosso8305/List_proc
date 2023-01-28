@@ -8,7 +8,7 @@
 
 #define maxProcess 65000
 #define skipProcess 1 // 1--> Skip system process (ID System Process: 0 & 4) 0--> Don't skip system process 
-#define writeFile 1 // 1--> Write file 0--> Don't write file
+#define writeFile 0 // 1--> Write file 0--> Don't write file
 
 ///////////////////////////////////////////////
 //            Function: display             //
