@@ -1,0 +1,5 @@
+TARGETNAME=hook-sz
+TARGETTYPE=DRIVER
+
+SOURCES=hook.c
+
